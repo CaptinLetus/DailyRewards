@@ -7,8 +7,6 @@ This is a system that is designed to add daily rewards to your game.
 
 Simply clone the repo and pull out the files into your own project
 
-End with an example of getting some data out of the system or using it for a little demo
-
 ## Getting Started
 
 You will want to add your reward data to `ReplicatedStorage.Rewards`
