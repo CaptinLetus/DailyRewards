@@ -23,6 +23,9 @@ local function getAwardInfo(player)
 	return dailyStore:Get(DEFAULT_DATA), dailyStore
 end
 
+--[[
+	You will want to add your own award logic here.
+]]--
 local function giveReward(player, day)
 	local rewardInfo = Rewards[day]
 
@@ -70,6 +73,7 @@ GetRewardData.OnServerInvoke = function (player)
 	 return data
 end
 
+-- make sure a player is still allows to claim todays reward
 while task.wait(1) do
 	for _,player in pairs (Players:GetPlayers()) do
 		local rewardData, rewardStore = getAwardInfo(player)
