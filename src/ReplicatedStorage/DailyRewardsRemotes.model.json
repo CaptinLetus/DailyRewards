@@ -1,0 +1,17 @@
+{
+    "ClassName": "Folder",
+    "Children": [
+        {
+            "Name": "ClaimReward",
+            "ClassName": "RemoteEvent"
+        },
+        {
+            "Name": "AwardInfoUpdated",
+            "ClassName": "RemoteEvent"
+        },
+        {
+            "Name": "GetRewardData",
+            "ClassName": "RemoteFunction"
+        }
+    ]
+} 

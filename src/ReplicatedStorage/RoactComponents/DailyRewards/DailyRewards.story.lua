@@ -5,7 +5,8 @@ local handle
 
 local app = function () 
 	return Roact.createElement(require(script.Parent), {
-		
+		LastReward = os.time(),
+		CurrentDay = 5,
 	})
 end
 

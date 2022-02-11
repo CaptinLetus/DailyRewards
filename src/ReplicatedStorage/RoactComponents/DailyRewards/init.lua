@@ -2,27 +2,42 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Roact = require(ReplicatedStorage.Packages.Roact)
 local Day = require(script.Day)
-local Day7 = require(script.Day7)
 local CloseButton = require(script.CloseButton)
 local ClaimButton = require(script.ClaimButton)
 
-local e = Roact.createElement
+local DAY_IN_SECONDS = 86400
 
-local function nextReward()
+local DailyRewards = Roact.Component:extend("DailyRewards")
+
+-- format time as hh:mm:ss
+local function formatTime(time)
+	local hours = math.floor(time / 3600)
+	local minutes = math.floor((time - hours * 3600) / 60)
+	local seconds = time - hours * 3600 - minutes * 60
+
+	return string.format("%02d:%02d:%02d", hours, minutes, seconds)
+end
+
+local function getTimeLeft(lastReward)
+	return lastReward - os.time() + DAY_IN_SECONDS
+end
+
+local function nextReward(props)
+	local timeText = formatTime(props.Time)
+
 	return Roact.createElement("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
 		Position = UDim2.fromScale(0.5, 0.8),
 		Size = UDim2.fromScale(0.275, 0.15),
+		Visible = props.Visible,
 	}, {
-		price = Roact.createElement("TextLabel", {
+		title = Roact.createElement("TextLabel", {
 			Font = Enum.Font.GothamBlack,
 			Text = "Next Reward In",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextScaled = true,
-			TextSize = 14,
-			TextWrapped = true,
 			AnchorPoint = Vector2.new(0.5, 0),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
@@ -31,11 +46,9 @@ local function nextReward()
 		}),
 		timeLeft = Roact.createElement("TextLabel", {
 			Font = Enum.Font.GothamBlack,
-			Text = "23:59:25",
+			Text = timeText,
 			TextColor3 = Color3.fromRGB(255, 184, 248),
 			TextScaled = true,
-			TextSize = 14,
-			TextWrapped = true,
 			AnchorPoint = Vector2.new(0.5, 0),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
@@ -45,18 +58,51 @@ local function nextReward()
 	})
 end
 
-return function(props)
+function DailyRewards:init()
+	self:setState({
+		timeUntilNextReward = getTimeLeft(self.props.LastReward),
+	})
+end
+
+function DailyRewards:didMount()
+	self._active = true
+
+	task.spawn(function()
+		while self._active do
+			self:setState({
+				timeUntilNextReward = getTimeLeft(self.props.LastReward),
+			})
+
+			task.wait(1)
+		end
+	end)
+end
+
+function DailyRewards:willUnmount()
+	self._active = false
+end
+
+function DailyRewards:render()
 	local days = {}
 
-	for i = 1, 6 do
-		days[i] = Roact.createElement(Day)
+	for i = 1, 7 do
+		days[i] = Roact.createElement(Day, {
+			Day = i,
+			CurrentDay = self.props.CurrentDay,
+			AlreadyClaimed = getTimeLeft(self.props.LastReward) > 0
+		})
 	end
 
-	return e("Frame", {
+	local timeLeft = self.state.timeUntilNextReward
+
+	return Roact.createElement("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(248, 248, 248),
 		Position = UDim2.fromScale(0.5, 0.475),
 		Size = UDim2.fromScale(0.5, 0.5),
+		Visible = self.props.Visible and self.props.Visible:map(function (value)
+			return value
+		end) or true
 	}, {
 		uIStroke = Roact.createElement("UIStroke", {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
@@ -78,19 +124,21 @@ return function(props)
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
 			Position = UDim2.fromScale(0.5, 0.15),
-			Size = UDim2.fromScale(0.9, 0.3),
+			Size = UDim2.fromScale(0.9, 0.6),
 		}, {
-			uIListLayout = Roact.createElement("UIListLayout", {
-				Padding = UDim.new(0.00800000038, 0),
-				FillDirection = Enum.FillDirection.Horizontal,
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
 			Roact.createFragment(days),
 		}),
-		day7 = Roact.createElement(Day7),
-		nextReward = Roact.createElement(nextReward),
-		claim = Roact.createElement(ClaimButton),
-		close = Roact.createElement(CloseButton),
+		nextReward = Roact.createElement(nextReward, {
+			Time = timeLeft,
+			Visible = timeLeft > 0,
+		}),
+		claim = Roact.createElement(ClaimButton, {
+			Visible = timeLeft <= 0,
+			OnClaim = self.props.OnClaim,
+		}),
+		close = Roact.createElement(CloseButton, {
+			OnClose = self.props.OnClose,
+		}),
 		title = Roact.createElement("TextLabel", {
 			Font = Enum.Font.GothamBlack,
 			Text = "DAILY REWARDS",
@@ -113,3 +161,5 @@ return function(props)
 		}),
 	})
 end
+
+return DailyRewards

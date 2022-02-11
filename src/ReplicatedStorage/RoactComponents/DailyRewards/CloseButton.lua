@@ -15,6 +15,7 @@ return function(props)
 		Position = UDim2.fromScale(1, 0),
 		Size = UDim2.fromScale(0.15, 0.15),
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
+		[Roact.Event.Activated] = props.OnClose
 	}, {
 		uICorner = Roact.createElement("UICorner", {
 			CornerRadius = UDim.new(0, 20),
