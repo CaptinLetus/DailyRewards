@@ -1,6 +1,6 @@
 # Daily Rewards System
 
-This is a system that iss designed to add daily rewards to your game.
+This is a system that is designed to add daily rewards to your game.
 
 
 ### Installing
