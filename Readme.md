@@ -5,7 +5,7 @@ This is a system that is designed to add daily rewards to your game.
 
 ### Installing
 
-Simply clone the repo and pull out the files into your own project
+[Download the source from the releases page](https://github.com/CaptinLetus/DailyRewards/releases/tag/1.0.0)
 
 ## Getting Started
 
